@@ -7,6 +7,8 @@
  */
 
 #include "ESPPWMFanControl.h"
+#include "Adafruit_Sensor.h"
+#include "Adafruit_AM2320.h"
 
 // the "fan channel" to control all fans simultaneously
 #define FANS_ALL        -1
@@ -15,6 +17,7 @@ ESP8266WebServer *webServer;
 //PubSubClient *mqttClient;
 SSD1306Brzo *display;
 Storage *storage;
+Adafruit_AM2320 am2320 = Adafruit_AM2320();
 
 void setup()
 {
@@ -22,7 +25,8 @@ void setup()
     Serial.begin(115200);
     Serial.println(F("ESP PWM Fan Control starting...\n"));
 
-    
+    Serial.println("Adafruit AM2320 Init");
+    am2320.begin();
     // setup PWM pins
     for(uint8_t i = 0; i < settings::fanCount; i++) {
         pinMode(settings::fanPins[i], OUTPUT);
@@ -572,7 +576,8 @@ bool streamFile(String filename, bool download) {
 }
 
 float readTemperature() {
-    return FanControlHelper::calculateNTCTemperature(analogRead(settings::ntcAnalogPin), settings::ntcValueRange, settings::ntcVoltage, settings::ntcReferenceResistance, settings::ntcReferenceTemperature, settings::ntcBeta, settings::ntcPullUpResistorValue, settings::ntcRoundTemperatureToDecimals);
+	return am2320.readTemperature();
+    //return FanControlHelper::calculateNTCTemperature(analogRead(settings::ntcAnalogPin), settings::ntcValueRange, settings::ntcVoltage, settings::ntcReferenceResistance, settings::ntcReferenceTemperature, settings::ntcBeta, settings::ntcPullUpResistorValue, settings::ntcRoundTemperatureToDecimals);
 }
 
 void initDisplay() {
